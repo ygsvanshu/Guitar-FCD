@@ -13,7 +13,7 @@ GuitarData.h5
                 -> LightPoint   (Dataset: Float [2,1])  
                 -> LightLine    (Dataset: Float [2,2])
                 -> CameraLine   (Dataset: Float [2,2])
-                -> Alpha        (Dataset: Float, units: rad)
+                -> Phi          (Dataset: Float, units: rad)
                 -> D            (Dataset: Float, units: mm)
                 -> Theta        (Dataset: Float, units: rad)
 
@@ -25,7 +25,7 @@ Day:        The day on which this data was recorded; useful to check against ima
 LightPoint: The center point of LED light panel as marked on the calibrated image. Point in format [x0,y0] in mm from the origin (read below for more info)
 LightLine:  The line segment parallel to the of LED surface panel as marked on the calibrated image. Points in format [[x1,y1],[x2,y2]] in mm from the origin (read below for more info)
 CameraLine: The line segment (usually) parallel (perpendicular in Day5) to the of lens of the camera surface panel as marked on the calibrated image. Points in format [[x1,y1],[x2,y2]] in mm from the origin (read below for more info)
-Alpha:      The angle subtended by the LightLine with the surface of the guitar (y-axis)
+Phi:        The angle subtended by the LightLine with the surface of the guitar (y-axis)
 D:          The normal distance between the LightPoint and the guitar surface (y-axis)
 Theta:      The angle subtended by the camera view line with the guitar surface normal (x-axis)
 
