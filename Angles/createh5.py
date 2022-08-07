@@ -76,7 +76,7 @@ for i,r in enumerate(rows):
         co.create_dataset('LightPoint',data=[dd[0],dd[1]])
         co.create_dataset('LightLine',data=[[dd[2],dd[3]],[dd[4],dd[5]]])
         co.create_dataset('CameraLine',data=[[dd[6],dd[7]],[dd[8],dd[9]]])
-        co.create_dataset('Alpha',data=dd[10])
+        co.create_dataset('Phi',data=dd[10])
         co.create_dataset('D',data=dd[11])
         co.create_dataset('Theta',data=dd[12])
 
