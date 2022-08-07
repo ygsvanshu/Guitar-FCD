@@ -47,8 +47,8 @@ def LOAD_INPUTS(inputs):
         inputs[6].set(filedata['units_F'])
         inputs[7].set(filedata['theta'])
         inputs[8].set(filedata['units_theta'])
-        inputs[9].set(filedata['alpha'])
-        inputs[10].set(filedata['units_alpha'])
+        inputs[9].set(filedata['phi'])
+        inputs[10].set(filedata['units_phi'])
         inputs[11].set(filedata['patternx'])
         inputs[12].set(filedata['units_patternx'])
         inputs[13].set(filedata['patterny'])
@@ -75,8 +75,8 @@ def SAVE_INPUTS(inputs):
             units_F        = inputs[6].get(),
             theta          = inputs[7].get(),
             units_theta    = inputs[8].get(),
-            alpha          = inputs[9].get(),
-            units_alpha    = inputs[10].get(),
+            phi          = inputs[9].get(),
+            units_phi    = inputs[10].get(),
             patternx       = inputs[11].get(),
             units_patternx = inputs[12].get(),
             patterny       = inputs[13].get(),
@@ -126,8 +126,8 @@ def RUN_CALCULATION(inputs,progressbar,entries,comboboxes,buttons,runbutton,abor
         units_F        = inputs[6].get()
         theta          = inputs[7].get()
         units_theta    = inputs[8].get()
-        alpha          = inputs[9].get()
-        units_alpha    = inputs[10].get()
+        phi          = inputs[9].get()
+        units_phi    = inputs[10].get()
         patternx       = inputs[11].get()
         units_patternx = inputs[12].get()
         patterny       = inputs[13].get()
@@ -184,15 +184,15 @@ def RUN_CALCULATION(inputs,progressbar,entries,comboboxes,buttons,runbutton,abor
         else:
             theta = theta*angular_multi[angular_units.index(units_theta)]
         try:
-            alpha = float(alpha)
+            phi = float(phi)
         except:
             CALCERROR("α is not a number")
             return()
-        if (units_alpha not in angular_units):
+        if (units_phi not in angular_units):
             CALCERROR("Invalid units for α")
             return()
         else:
-            alpha = alpha*angular_multi[angular_units.index(units_alpha)]
+            phi = phi*angular_multi[angular_units.index(units_phi)]
         try:
             patternx = float(patternx)
         except:
@@ -244,12 +244,12 @@ def RUN_CALCULATION(inputs,progressbar,entries,comboboxes,buttons,runbutton,abor
         except:
             resultfile['theta (rad)'][0] = theta
         try:
-            resultfile.create_dataset('alpha (rad)',data=[alpha])
+            resultfile.create_dataset('phi (rad)',data=[phi])
         except:
-            resultfile['alpha (rad)'][0] = alpha
+            resultfile['phi (rad)'][0] = phi
 
         c1,c2,k1,k2,nx,ny = PROCESS_IMAGE(refimgpath)
-        scalex,scaley = GET_SCALE(H,F,theta,alpha,k1,k2,patternx,patterny)
+        scalex,scaley = GET_SCALE(H,F,theta,phi,k1,k2,patternx,patterny)
         A = INTGRAD2_A(nx,ny,dx=scalex,dy=scaley,a11=False)
 
         t1 = time.time()
@@ -342,8 +342,8 @@ units_F        = tk.StringVar()
 theta          = tk.StringVar()
 units_theta    = tk.StringVar()
 
-alpha          = tk.StringVar()
-units_alpha    = tk.StringVar()
+phi          = tk.StringVar()
+units_phi    = tk.StringVar()
 
 patternx       = tk.StringVar()
 units_patternx = tk.StringVar()
@@ -414,13 +414,13 @@ e6.grid(column=1,row=5,columnspan=1,sticky='nsew')
 d3 = ttk.Combobox(frm,values=["deg","rad"],textvariable=units_theta,exportselection=0,state='readonly')
 d3.grid(column=2,row=5,sticky='nsew')
 
-l7 = ttk.Label(frm,text="α = ",anchor=tk.E)
+l7 = ttk.Label(frm,text="ϕ = ",anchor=tk.E)
 l7.grid(column=4,row=5,sticky='nsew')
 
-e7 = ttk.Entry(frm,textvariable=alpha)
+e7 = ttk.Entry(frm,textvariable=phi)
 e7.grid(column=5,row=5,columnspan=1,sticky='nsew')
 
-d4 = ttk.Combobox(frm,values=["deg","rad"],textvariable=units_alpha,exportselection=0,state='readonly')
+d4 = ttk.Combobox(frm,values=["deg","rad"],textvariable=units_phi,exportselection=0,state='readonly')
 d4.grid(column=6,row=5,sticky='nsew')
 
 l8 = ttk.Label(frm,text="pattern Δx = ",anchor=tk.E)
@@ -462,7 +462,7 @@ b6.grid(column=4,row=8,columnspan=3,sticky='nsew')
 b7 = ttk.Button(frm,text='! Abort !',state='disabled')
 b7.grid(column=4,row=9,columnspan=3,sticky='nsew')
 
-inputs  = [refimgpath,imgdirpath,datdirpath,H,units_H,F,units_F,theta,units_theta,alpha,units_alpha,patternx,units_patternx,patterny,units_patterny]
+inputs  = [refimgpath,imgdirpath,datdirpath,H,units_H,F,units_F,theta,units_theta,phi,units_phi,patternx,units_patternx,patterny,units_patterny]
 entries = [e1,e2,e3,e4,e5,e6,e7,e8,e9]
 comboboxes = [d1,d2,d3,d4,d5,d6]
 buttons = [b1,b2,b3,b4,b5]
