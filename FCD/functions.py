@@ -476,13 +476,13 @@ def GET_HEIGHT(A,u,v,H,theta,scalex=1,scaley=1,h11=0,a11=False):
     x  = np.array([scalex*np.arange(nx)])
     y  = np.transpose(np.array([scaley*np.arange(ny)]))
 
-    ig = -np.exp(y*T/H)/(2*H)
+    ig = -np.exp(x*T/H)/(2*H)
 
     fu = ig*u
     fv = ig*v
 
     fh = INTGRAD2_B(A,fu,fv,h11,a11)
-    h  = fh/np.exp(y*T/H)
+    h  = fh/np.exp(x*T/H)
 
     return(h)
 
