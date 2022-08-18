@@ -444,7 +444,7 @@ def INTGRAD2_B(A,fx,fy,f11=0,a11=False):
 
     return(C)
 
-def GET_SCALE(H,F,theta,phi,k1,k2,pattern_x,pattern_y):
+def GET_SCALE(H,F,theta,alpha,k1,k2,pattern_x,pattern_y):
     
     kx1 = k1[0]
     ky1 = k1[1]
@@ -459,33 +459,14 @@ def GET_SCALE(H,F,theta,phi,k1,k2,pattern_x,pattern_y):
         Gxx = (2*np.pi)/(((kx2**2)+(ky2**2))**0.5)
         Gyy = (2*np.pi)/(((kx1**2)+(ky1**2))**0.5)
 
-    factor = 1 - (H*np.cos(phi))/(F*np.cos(theta))
+    factor = 1 - (H*np.cos(alpha))/(F*np.cos(theta))
 
-    scalex = (pattern_x/Gxx)*(factor/np.cos(phi))
+    scalex = (pattern_x/Gxx)*(factor/np.cos(alpha))
     scaley = (pattern_y/Gyy)*(factor)
 
     return(scalex,scaley)
 
-def GET_COSPHI(k1,k2,pattern_x,pattern_y,scalex=1,scaley=1):
-
-    kx1 = k1[0]
-    ky1 = k1[1]
-
-    kx2 = k2[0]
-    ky2 = k2[1]
-
-    if (abs(ky1)<abs(ky2)):
-        Gxx = (2*np.pi)/(((kx1**2)+(ky1**2))**0.5)
-        Gyy = (2*np.pi)/(((kx2**2)+(ky2**2))**0.5)
-    else:
-        Gxx = (2*np.pi)/(((kx2**2)+(ky2**2))**0.5)
-        Gyy = (2*np.pi)/(((kx1**2)+(ky1**2))**0.5)
-
-    cosphi = (pattern_x/(scalex*Gxx))/(pattern_y/(scaley*Gyy))
-
-    return(cosphi)
-
-def GET_HEIGHT(A,u,v,H,theta,scalex=1,scaley=1,cosphi,h11=0,a11=False):
+def GET_HEIGHT(A,u,v,H,theta,scalex=1,scaley=1,h11=0,a11=False):
 
     nx = u.shape[1]
     ny = u.shape[0]
@@ -502,21 +483,6 @@ def GET_HEIGHT(A,u,v,H,theta,scalex=1,scaley=1,cosphi,h11=0,a11=False):
 
     fh = INTGRAD2_B(A,fu,fv,h11,a11)
     h  = fh/np.exp(x*T/H)
-
-    hx = np.mean(np.gradient(h,x,axis=1,edge_order=2))
-    ix = np.mean((-T/H)*np.exp(-x*T/H))
-
-    cosphi0 = scalex0/scaley0
-    cosphi1 = cosphi
-
-    tanphi0 = (((1/cosphi0)**2) - 1)**0.5
-    tanphi1 = (((1/cosphi1)**2) - 1)**0.5
-
-    tahdphi = (tanphi1 - tanphi0)/(1 + (tanphi0*tanphi1))
-
-    c = (tandphi - hx)/ix
-
-    h += np.ones_like(h)*c*np.exp(-x*T/H)
 
     return(h)
 
