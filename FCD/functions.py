@@ -474,7 +474,9 @@ def GET_HEIGHT(A,u,v,H,theta,scalex=1,scaley=1,h11=0,a11=False):
     T = 0.5*np.sin(2*theta)
 
     x  = np.array([scalex*np.arange(nx)])
+    x  = x - 0.5*(x[0,-1])
     y  = np.transpose(np.array([scaley*np.arange(ny)]))
+    y  = y - 0.5*(y[-1,0])
 
     ig = -np.exp(x*T/H)/(2*H)
 
