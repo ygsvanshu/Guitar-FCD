@@ -2,12 +2,11 @@ from functions import *
 
 # INPUTS
 
-imgdirpath = "Downsizing/guitar_origin_C001H001S0001_20220101_144452/"
-refimgname = "guitar_origin_C001H001S0001_20220101_1444520001.tif"
-angledata = "GuitarData.h5"
+imgdirpath = sys.argv[1]#"../../GitHub/Guitar-FCD/Dev/Sample_origin/"
+angledata = "../../Angles/GuitarData.h5"
 
-sqx = 0
-sqy = 0
+sqx = sys.argv[2]
+sqy = sys.argv[3]
 
 hnx = 1024
 hny = 1024
@@ -22,11 +21,13 @@ F = 0.44
 t0 = time.time()
 
 imagelist  = sorted(list(filter(IS_IMAGE,os.listdir(imgdirpath))))
-if (refimgname in imagelist):
-    imagelist.remove(refimgname)
+refimgname = imglist.pop(0)
 
-# imagelist=['guitar_origin_C001H001S0001_20220101_1444522950.tif']
-imagelist = imagelist[2950-10:2950+10]
+t1 = time.time()
+
+print('\n[{}] Reference image is {}'.format(TIMEC(t1-t0)),refimgname)
+
+t0 = time.time()
 
 anglefile = h5py.File(angledata,'r')
 angledata = anglefile['DATA']['{}'.format(sqy)]['{}'.format(sqx)]
@@ -36,8 +37,7 @@ phi = angledata['Phi'][()]
 
 H = D*np.cos(phi)
 
-# resultfile = h5py.File('({},{}).h5'.format(sqx,sqy),'w')
-resultfile = h5py.File('test.h5','w')
+resultfile = h5py.File('({},{}).h5'.format(sqx,sqy),'w')
 udata = resultfile.create_dataset('u',shape=[len(imagelist),hny,hnx],dtype=np.double)
 vdata = resultfile.create_dataset('v',shape=[len(imagelist),hny,hnx],dtype=np.double)
 hdata = resultfile.create_dataset('h',shape=[len(imagelist),hny,hnx],dtype=np.double)
@@ -51,13 +51,11 @@ scaley = scaley*nx/hny
 resultfile.create_dataset('scalex',data=scalex)
 resultfile.create_dataset('scaley',data=scaley)
 
-A = INTGRAD2_A(hnx,hny,dx=scalex,dy=scaley,a11=False)
-
-C0 = np.zeros([hny,hnx])
+SS,AT = INTGRAD2_A(hnx,hny,dx=scalex,dy=scaley)
 
 t1 = time.time()
 
-print('\n[{}] Initialization complete'.format(TIMEC(t1-t0)))
+print('[{}] Initialization complete'.format(TIMEC(t1-t0)))
 
 for num,image in enumerate(imagelist):
 
@@ -68,7 +66,7 @@ for num,image in enumerate(imagelist):
     u,v = GET_DISPLACEMENT(m1,m2,c1,c2,k1,k2)
     u = u[::(ny//hny),::(nx//hnx)]*scalex
     v = v[::(ny//hny),::(nx//hnx)]*scaley
-    h,C0 = GET_HEIGHT(A,u,v,H,theta,scalex,scaley,C0=C0.flatten())
+    h = GET_HEIGHT(SS,AT,u,v,H,theta,scalex,scaley)
 
     tw = time.time()
 
@@ -78,8 +76,6 @@ for num,image in enumerate(imagelist):
     hdata[num] = h
 
     t3 = time.time()
-
-    print(TIMEC(t3-tw))
 
     ela = t3-t0
     eta = t3-t1
