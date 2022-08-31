@@ -21,7 +21,7 @@ F = 0.44
 t0 = time.time()
 
 imagelist  = sorted(list(filter(IS_IMAGE,os.listdir(imgdirpath))))
-refimgname = imglist.pop(0)
+refimgname = imagelist.pop(0)
 
 t1 = time.time()
 
