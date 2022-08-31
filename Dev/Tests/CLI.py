@@ -3,7 +3,7 @@ from functions import *
 # INPUTS
 
 imgdirpath = sys.argv[1]#"../../GitHub/Guitar-FCD/Dev/Sample_origin/"
-angledata = "../../Angles/GuitarData.h5"
+angledata = "GuitarData.h5"
 
 sqx = sys.argv[2]
 sqy = sys.argv[3]
@@ -25,9 +25,7 @@ refimgname = imagelist.pop(0)
 
 t1 = time.time()
 
-print('\n[{}] Reference image is {}'.format(TIMEC(t1-t0)),refimgname)
-
-t0 = time.time()
+print('\n[{}] Reference image is {}'.format((TIMEC(t1-t0)),refimgname))
 
 anglefile = h5py.File(angledata,'r')
 angledata = anglefile['DATA']['{}'.format(sqy)]['{}'.format(sqx)]
@@ -43,7 +41,7 @@ vdata = resultfile.create_dataset('v',shape=[len(imagelist),hny,hnx],dtype=np.do
 hdata = resultfile.create_dataset('h',shape=[len(imagelist),hny,hnx],dtype=np.double)
 idata = resultfile.create_dataset('imagenames',shape=[len(imagelist)],dtype=h5py.string_dtype())
 
-c1,c2,k1,k2,nx,ny = PROCESS_IMAGE(imgdirpath+refimgname)
+c1,c2,k1,k2,nx,ny = PROCESS_IMAGE(os.path.join(imgdirpath,refimgname))
 scalex,scaley = GET_SCALE(H,F,theta,phi,k1,k2,patternx,patterny)
 scalex = scalex*nx/hnx
 scaley = scaley*nx/hny
