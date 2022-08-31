@@ -47,6 +47,7 @@ def IMPORT(module,alias=None):
     return()
 
 ##[Vanshu] System modules (default in all python3 installations)
+from logging import raiseExceptions
 import os
 import sys
 import time
@@ -304,7 +305,7 @@ def GET_DISPLACEMENT(m1,m2,c1,c2,k1,k2):
 
     return(u,v)
 
-def INTGRAD2_A(nx,ny,dx=1,dy=1,a11=False):
+def INTGRAD2_A(nx,ny,dx=1,dy=1):
 
     if ((not isinstance(nx,int))or(not isinstance(ny,int))):
         raise ValueError('nx and ny must be integers')
@@ -334,93 +335,150 @@ def INTGRAD2_A(nx,ny,dx=1,dy=1,a11=False):
         dyp = np.pad((dy[1:]-dy[:-1]),(0,1),'edge')
         dym = np.pad((dy[1:]-dy[:-1]),(1,0),'edge')
 
-    if a11:
-        I = np.zeros([6*nx*ny+1])
-        J = np.zeros([6*nx*ny+1])
-        C = np.zeros([6*nx*ny+1])
-    else:
-        I = np.zeros([6*nx*ny])
-        J = np.zeros([6*nx*ny])
-        C = np.zeros([6*nx*ny])
-
     k = 0
+
+    if (nx%2==0):
+        if (ny%2==0):
+            I = np.zeros([6*nx*ny+4])
+            J = np.zeros([6*nx*ny+4])
+            C = np.zeros([6*nx*ny+4])
+
+            I[0] = 0
+            J[0] = ((ny//2)-1)*nx + (nx//2) - 1
+            C[0] = 0.25
+
+            I[1] = 0
+            J[1] = ((ny//2)-1)*nx + (nx//2)
+            C[1] = 0.25
+
+            I[2] = 0
+            J[2] = (ny//2)*nx + (nx//2) - 1
+            C[2] = 0.25
+
+            I[3] = 0
+            J[3] = (ny//2)*nx + (nx//2)
+            C[3] = 0.25
+
+            k = 4
+        else:
+            I = np.zeros([6*nx*ny+2])
+            J = np.zeros([6*nx*ny+2])
+            C = np.zeros([6*nx*ny+2])
+
+            I[0] = 0
+            J[0] = (ny//2)*nx + (nx//2) - 1
+            C[0] = 0.5
+
+            I[1] = 0
+            J[1] = (ny//2)*nx + (nx//2)
+            C[1] = 0.5
+
+            k = 2
+    else:
+        if (ny%2==0):
+            I = np.zeros([6*nx*ny+2])
+            J = np.zeros([6*nx*ny+2])
+            C = np.zeros([6*nx*ny+2])
+
+            I[0] = 0
+            J[0] = ((ny//2)-1)*nx + (nx//2)
+            C[0] = 0.5
+
+            I[1] = 0
+            J[1] = (ny//2)*nx + (nx//2)
+            C[1] = 0.5
+
+            k = 2
+        else:
+            I = np.zeros([6*nx*ny+1])
+            J = np.zeros([6*nx*ny+1])
+            C = np.zeros([6*nx*ny+1])
+
+            I[0] = 0
+            J[0] = (ny//2)*nx + (nx//2)
+            C[0] = 1.0
+
+            k = 1
+
+    l = 1
     for j in range(ny):
         for i in range(nx):
             
-            I[3*k  ] = k
-            I[3*k+1] = k
-            I[3*k+2] = k
+            I[k  ] = l
+            I[k+1] = l
+            I[k+2] = l
 
             ic = j*nx + i
             im = (ic - 1)%(nx*ny)
             ip = (ic + 1)%(nx*ny)
 
-            J[3*k  ] = im
-            J[3*k+1] = ic
-            J[3*k+2] = ip
+            J[k  ] = im
+            J[k+1] = ic
+            J[k+2] = ip
 
             d_p = dxp[i]
             d_m = dxm[i]
             
             if (i==0):
-                C[3*k  ] = 0.0
-                C[3*k+1] = -1/d_p
-                C[3*k+2] = 1/d_p
+                C[k  ] = 0.0
+                C[k+1] = -1/d_p
+                C[k+2] = 1/d_p
             elif(i==nx-1):
-                C[3*k  ] = -1/d_m
-                C[3*k+1] = 1/d_m
-                C[3*k+2] = 0.0
+                C[k  ] = -1/d_m
+                C[k+1] = 1/d_m
+                C[k+2] = 0.0
             else:
-                C[3*k  ] = -d_p/(d_m*(d_m+d_p))
-                C[3*k+1] = (d_p-d_m)/(d_m*d_p)
-                C[3*k+2] = d_m/(d_p*(d_m+d_p))
+                C[k  ] = -d_p/(d_m*(d_m+d_p))
+                C[k+1] = (d_p-d_m)/(d_m*d_p)
+                C[k+2] = d_m/(d_p*(d_m+d_p))
 
-            k = k+1
+            k = k+3
+            l = l+1
     
     for j in range(ny):
         for i in range(nx):
 
-            I[3*k  ] = k
-            I[3*k+1] = k
-            I[3*k+2] = k
+            I[k  ] = l
+            I[k+1] = l
+            I[k+2] = l
 
             jc = j*nx + i
             jm = (jc - nx)%(nx*ny)
             jp = (jc + nx)%(nx*ny)
 
-            J[3*k  ] = jm
-            J[3*k+1] = jc
-            J[3*k+2] = jp
+            J[k  ] = jm
+            J[k+1] = jc
+            J[k+2] = jp
 
             d_p = dyp[j]
             d_m = dym[j]
             
             if (j==0):
-                C[3*k  ] = 0.0
-                C[3*k+1] = -1/d_p
-                C[3*k+2] = 1/d_p
+                C[k  ] = 0.0
+                C[k+1] = -1/d_p
+                C[k+2] = 1/d_p
             elif(j==ny-1):
-                C[3*k  ] = -1/d_m
-                C[3*k+1] = 1/d_m
-                C[3*k+2] = 0.0
+                C[k  ] = -1/d_m
+                C[k+1] = 1/d_m
+                C[k+2] = 0.0
             else:
-                C[3*k  ] = -d_p/(d_m*(d_m+d_p))
-                C[3*k+1] = (d_p-d_m)/(d_m*d_p)
-                C[3*k+2] = d_m/(d_p*(d_m+d_p))
+                C[k  ] = -d_p/(d_m*(d_m+d_p))
+                C[k+1] = (d_p-d_m)/(d_m*d_p)
+                C[k+2] = d_m/(d_p*(d_m+d_p))
 
-            k = k+1
+            k = k+3
+            l = l+1
 
-    if a11:
-        I[-1] = k
-        J[-1] = 0
-        C[-1] = 1
-        A = sspr.csc_matrix((C,(I,J)),shape=(2*nx*ny+1,nx*ny))
-    else:
-        A = sspr.csc_matrix((C,(I,J)),shape=(2*nx*ny,nx*ny))
+    A = sspr.csc_matrix((C,(I,J)),shape=(2*nx*ny+1,nx*ny))
 
-    return(A)
+    AT = (A.transpose()).tocsc()
+    AA = (AT.dot(A)).tocsc()
 
-def INTGRAD2_B(A,fx,fy,f11=0,a11=False):
+    SS = sspr.linalg.factorized(AA)
+
+    return(SS,AT)
+
+def INTGRAD2_B(SS,AT,fx,fy,h00=0):
 
     if ((fx.ndim!=2)or(fy.ndim!=2)):
         raise ValueError('fx and fy must be 2d arrays')
@@ -428,19 +486,16 @@ def INTGRAD2_B(A,fx,fy,f11=0,a11=False):
     if (fx.shape!=fy.shape):
         raise ValueError('fx and fy must be the same sizes.')
 
-    if (A.shape[1]!=fx.size):
+    if (AT.shape[0]!=fx.size):
         raise ValueError('Matrix A not compatible for the given fx and fy; re-generate matrix A')
 
-    if ((not isinstance(f11,(int,float)))or(not np.isfinite(f11))or(not np.isreal(f11))):
-        raise ValueError('f11 must be a finite scalar numeric variable.') 
+    if ((not isinstance(h00,(int,float)))or(not np.isfinite(h00))or(not np.isreal(h00))):
+        raise ValueError('h00 must be a finite scalar numeric variable.') 
 
-    if a11:
-        B = np.concatenate((fx.flatten(),fy.flatten(),np.array([f11])))
-    else:
-        B = np.concatenate((fx.flatten(),fy.flatten()))
-    C = sspr.linalg.lsmr(A,B)[0]
-    C = np.reshape(C,fx.shape)
-    C = (C - C[0,0])+f11
+    B = np.concatenate((np.array([h00]),fx.flatten(),fy.flatten()))
+    B = AT.dot(B)
+    C = SS(B)
+    C = C.reshape(fx.shape)
 
     return(C)
 
@@ -466,7 +521,7 @@ def GET_SCALE(H,F,theta,alpha,k1,k2,pattern_x,pattern_y):
 
     return(scalex,scaley)
 
-def GET_HEIGHT(A,u,v,H,theta,scalex=1,scaley=1,h11=0,a11=False):
+def GET_HEIGHT(SS,AT,u,v,H,theta,scalex=1,scaley=1,h00=0):
 
     nx = u.shape[1]
     ny = u.shape[0]
@@ -483,8 +538,7 @@ def GET_HEIGHT(A,u,v,H,theta,scalex=1,scaley=1,h11=0,a11=False):
     fu = ig*u
     fv = ig*v
 
-    fh = INTGRAD2_B(A,fu,fv,h11,a11)
+    fh = INTGRAD2_B(SS,AT,fu,fv,h00=h00)
     h  = fh/np.exp(x*T/H)
 
     return(h)
-

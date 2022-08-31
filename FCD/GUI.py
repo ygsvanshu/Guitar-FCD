@@ -41,8 +41,8 @@ def LOAD_INPUTS(inputs):
         inputs[0].set(filedata['refimgpath'])
         inputs[1].set(filedata['imgdirpath'])
         inputs[2].set(filedata['datdirpath'])
-        inputs[3].set(filedata['H'])
-        inputs[4].set(filedata['units_H'])
+        inputs[3].set(filedata['D'])
+        inputs[4].set(filedata['units_D'])
         inputs[5].set(filedata['F'])
         inputs[6].set(filedata['units_F'])
         inputs[7].set(filedata['theta'])
@@ -69,14 +69,14 @@ def SAVE_INPUTS(inputs):
             refimgpath     = inputs[0].get(),
             imgdirpath     = inputs[1].get(),
             datdirpath     = inputs[2].get(),
-            H              = inputs[3].get(),
-            units_H        = inputs[4].get(),
+            D              = inputs[3].get(),
+            units_D        = inputs[4].get(),
             F              = inputs[5].get(),
             units_F        = inputs[6].get(),
             theta          = inputs[7].get(),
             units_theta    = inputs[8].get(),
-            phi          = inputs[9].get(),
-            units_phi    = inputs[10].get(),
+            phi            = inputs[9].get(),
+            units_phi      = inputs[10].get(),
             patternx       = inputs[11].get(),
             units_patternx = inputs[12].get(),
             patterny       = inputs[13].get(),
@@ -120,14 +120,14 @@ def RUN_CALCULATION(inputs,progressbar,entries,comboboxes,buttons,runbutton,abor
         refimgpath     = inputs[0].get()
         imgdirpath     = inputs[1].get()
         datdirpath     = inputs[2].get()
-        H              = inputs[3].get()
-        units_H        = inputs[4].get()
+        D              = inputs[3].get()
+        units_D        = inputs[4].get()
         F              = inputs[5].get()
         units_F        = inputs[6].get()
         theta          = inputs[7].get()
         units_theta    = inputs[8].get()
-        phi          = inputs[9].get()
-        units_phi    = inputs[10].get()
+        phi            = inputs[9].get()
+        units_phi      = inputs[10].get()
         patternx       = inputs[11].get()
         units_patternx = inputs[12].get()
         patterny       = inputs[13].get()
@@ -154,15 +154,15 @@ def RUN_CALCULATION(inputs,progressbar,entries,comboboxes,buttons,runbutton,abor
             CALCERROR("Path for the resulting HDF5 data file is invalid")
             return()       
         try:
-            H = float(H)
+            D = float(D)
         except:
-            CALCERROR("H is not a number")
+            CALCERROR("D is not a number")
             return()
-        if (units_H not in linear_units):
+        if (units_D not in linear_units):
             CALCERROR("Invalid units for H")
             return()
         else:
-            H = H*linear_multi[linear_units.index(units_H)]
+            D = D*linear_multi[linear_units.index(units_D)]
         try:
             F = float(F)
         except:
@@ -232,9 +232,9 @@ def RUN_CALCULATION(inputs,progressbar,entries,comboboxes,buttons,runbutton,abor
                 CALCERROR("Unable to save HDF5 result file")
                 return()
         try:
-            resultfile.create_dataset('H (m)',data=[H])
+            resultfile.create_dataset('D (m)',data=[H])
         except:
-            resultfile['H (m)'][0] = H
+            resultfile['D (m)'][0] = H
         try:
             resultfile.create_dataset('F (m)',data=[F])
         except:
@@ -248,9 +248,10 @@ def RUN_CALCULATION(inputs,progressbar,entries,comboboxes,buttons,runbutton,abor
         except:
             resultfile['phi (rad)'][0] = phi
 
+        H = D*np.cos(phi)
         c1,c2,k1,k2,nx,ny = PROCESS_IMAGE(refimgpath)
         scalex,scaley = GET_SCALE(H,F,theta,phi,k1,k2,patternx,patterny)
-        A = INTGRAD2_A(nx,ny,dx=scalex,dy=scaley,a11=False)
+        SS,AT = INTGRAD2_A(nx,ny,dx=scalex,dy=scaley)
 
         t1 = time.time()
 
@@ -263,7 +264,7 @@ def RUN_CALCULATION(inputs,progressbar,entries,comboboxes,buttons,runbutton,abor
             imagepath = os.path.join(imgdirpath,image)
             m1,m2,tp,tp,tp,tp = PROCESS_IMAGE(imagepath)
             u,v = GET_DISPLACEMENT(m1,m2,c1,c2,k1,k2)
-            h = GET_HEIGHT(A,u,v,H,theta,scalex,scaley,h11=0,a11=False)
+            h = GET_HEIGHT(A,u,v,H,theta,scalex,scaley,h00=0.0)
 
             imagename = image.split('.')[0]
             try:
@@ -333,8 +334,8 @@ refimgpath     = tk.StringVar()
 imgdirpath     = tk.StringVar()
 datdirpath     = tk.StringVar()
 
-H              = tk.StringVar()
-units_H        = tk.StringVar()
+D              = tk.StringVar()
+units_D        = tk.StringVar()
 
 F              = tk.StringVar()
 units_F        = tk.StringVar()
@@ -387,13 +388,13 @@ s1.grid(column=0,row=3,columnspan=7,sticky='nsew',pady=10)
 s2 = ttk.Separator(frm,orient='vertical')
 s2.grid(column=3,row=4,rowspan=3,sticky='nsew',padx=10)
 
-l4 = ttk.Label(frm,text="H = ",anchor=tk.E)
+l4 = ttk.Label(frm,text="D = ",anchor=tk.E)
 l4.grid(column=0,row=4,sticky='nsew')
 
-e4 = ttk.Entry(frm,textvariable=H)
+e4 = ttk.Entry(frm,textvariable=D)
 e4.grid(column=1,row=4,columnspan=1,sticky='nsew')
 
-d1 = ttk.Combobox(frm,values=["m","cm","mm","ft","in"],textvariable=units_H,exportselection=0,state='readonly')
+d1 = ttk.Combobox(frm,values=["m","cm","mm","ft","in"],textvariable=units_D,exportselection=0,state='readonly')
 d1.grid(column=2,row=4,sticky='nsew')
 
 l5 = ttk.Label(frm,text="F = ",anchor=tk.E)
@@ -462,7 +463,7 @@ b6.grid(column=4,row=8,columnspan=3,sticky='nsew')
 b7 = ttk.Button(frm,text='! Abort !',state='disabled')
 b7.grid(column=4,row=9,columnspan=3,sticky='nsew')
 
-inputs  = [refimgpath,imgdirpath,datdirpath,H,units_H,F,units_F,theta,units_theta,phi,units_phi,patternx,units_patternx,patterny,units_patterny]
+inputs  = [refimgpath,imgdirpath,datdirpath,D,units_D,F,units_F,theta,units_theta,phi,units_phi,patternx,units_patternx,patterny,units_patterny]
 entries = [e1,e2,e3,e4,e5,e6,e7,e8,e9]
 comboboxes = [d1,d2,d3,d4,d5,d6]
 buttons = [b1,b2,b3,b4,b5]
